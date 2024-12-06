@@ -4,13 +4,13 @@
 
   export let f: Feature<LineString>;
 
-let pt1 = f.geometry.coordinates[0];
-        console.log(pt1);
+  let pt1 = f.geometry.coordinates[0];
+  console.log(pt1);
 </script>
 
 {#each f.geometry.coordinates as pt}
   <Marker draggable bind:lngLat={pt}>
-          <span class="dot" />
+    <span class="dot" />
   </Marker>
 {/each}
 

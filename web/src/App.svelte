@@ -1,6 +1,6 @@
 <script lang="ts">
   import "@picocss/pico/css/pico.jade.min.css";
-  import init, { exampleCall } from "backend";
+  import init, { compareLines } from "backend";
   import { Layout } from "svelte-utils/two_column_layout";
   import type { Map } from "maplibre-gl";
   import { LineLayer, GeoJSON, MapLibre } from "svelte-maplibre";
@@ -9,13 +9,20 @@
   import { parse as parseWkt } from "wkt";
   import { twoLines } from "./examples";
   import EditLine from "./EditLine.svelte";
+  import { onMount } from "svelte";
 
   let maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
   let map: Map | undefined;
+  let loaded = false;
 
   let inputWkt = twoLines;
   let line1: Feature<LineString> | undefined;
   let line2: Feature<LineString> | undefined;
+
+  onMount(async () => {
+    await init();
+    loaded = true;
+  });
 
   $: parseLines(inputWkt);
   $: gj = makeGj(line1, line2);
@@ -76,6 +83,10 @@
     <h1>GeoRust tester</h1>
 
     <textarea bind:value={inputWkt} />
+
+    {#if loaded && line1 && line2}
+      <p>{compareLines(line1, line2)}</p>
+    {/if}
   </div>
 
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
