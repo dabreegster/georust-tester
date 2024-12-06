@@ -3,11 +3,11 @@
   import { compareLines } from "backend";
   import { LineLayer, GeoJSON } from "svelte-maplibre";
   import type { FeatureCollection, Feature, LineString } from "geojson";
-  import bbox from "@turf/bbox";
   import { parse as parseWkt } from "wkt";
   import { twoLines } from "./examples";
   import EditLine from "./EditLine.svelte";
   import type { Map } from "maplibre-gl";
+  import { zoomTo } from "./common";
 
   export let map: Map;
 
@@ -19,13 +19,11 @@
 
   $: parseLines(inputWkt);
   $: gj = makeGj(line1, line2);
-  // TODO Don't trigger when editing a line by markers
-  $: zoomTo(gj);
 
   function makeGj(
     line1: Feature<LineString> | undefined,
     line2: Feature<LineString> | undefined,
-  ) {
+  ): FeatureCollection {
     return {
       type: "FeatureCollection" as const,
       features: line1 && line2 ? [line1, line2] : [],
@@ -56,17 +54,10 @@
 
       line1 = features[0];
       line2 = features[1];
+
+      zoomTo(map, makeGj(line1, line2));
     } catch (err) {
       window.alert(err);
-    }
-  }
-
-  function zoomTo(gj: FeatureCollection) {
-    if (gj.features.length > 0) {
-      map.fitBounds(bbox(gj) as [number, number, number, number], {
-        animate: false,
-        padding: 10,
-      });
     }
   }
 </script>

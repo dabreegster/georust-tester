@@ -22,11 +22,7 @@ pub fn compare_lines(
     input2: JsValue,
     use_mercator: bool,
 ) -> Result<String, JsValue> {
-    // Panics shouldn't happen, but if they do, console.log them.
-    console_error_panic_hook::set_once();
-    START.call_once(|| {
-        console_log::init_with_level(log::Level::Info).unwrap();
-    });
+    setup();
 
     let f1: Feature = serde_wasm_bindgen::from_value(input1)?;
     let mut line1: LineString = f1.try_into().map_err(err_to_js)?;
@@ -57,11 +53,7 @@ pub fn line_interpolate_point(
     fraction: f64,
     use_mercator: bool,
 ) -> Result<String, JsValue> {
-    // Panics shouldn't happen, but if they do, console.log them.
-    console_error_panic_hook::set_once();
-    START.call_once(|| {
-        console_log::init_with_level(log::Level::Info).unwrap();
-    });
+    setup();
 
     let f: Feature = serde_wasm_bindgen::from_value(input)?;
     let mut line: LineString = f.try_into().map_err(err_to_js)?;
@@ -80,6 +72,15 @@ pub fn line_interpolate_point(
         Feature::from(Geometry::from(Value::from(&pt)))
     };
     serde_json::to_string(&f).map_err(err_to_js)
+}
+
+/// Common logging / crash handling for every method
+fn setup() {
+    // Panics shouldn't happen, but if they do, console.log them.
+    console_error_panic_hook::set_once();
+    START.call_once(|| {
+        console_log::init_with_level(log::Level::Info).unwrap();
+    });
 }
 
 fn err_to_js<E: std::fmt::Display>(err: E) -> JsValue {

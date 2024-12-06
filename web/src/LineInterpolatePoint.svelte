@@ -4,11 +4,11 @@
   import { lineInterpolatePoint } from "backend";
   import { LineLayer, CircleLayer, GeoJSON } from "svelte-maplibre";
   import type { FeatureCollection, Feature, LineString } from "geojson";
-  import bbox from "@turf/bbox";
   import { parse as parseWkt } from "wkt";
   import { twoLines } from "./examples";
   import EditLine from "./EditLine.svelte";
   import type { Map } from "maplibre-gl";
+  import { zoomTo } from "./common";
 
   export let map: Map;
 
@@ -20,8 +20,6 @@
 
   $: parseLine(inputWkt);
   $: gj = makeGj(line, fraction);
-  // TODO Don't trigger when editing a line by markers
-  $: zoomTo(gj);
 
   function makeGj(
     line: Feature<LineString> | undefined,
@@ -62,17 +60,10 @@
       }
 
       line = features[0];
+
+      zoomTo(map, makeGj(line, fraction));
     } catch (err) {
       window.alert(err);
-    }
-  }
-
-  function zoomTo(gj: FeatureCollection) {
-    if (gj.features.length > 0) {
-      map.fitBounds(bbox(gj) as [number, number, number, number], {
-        animate: false,
-        padding: 10,
-      });
     }
   }
 </script>
