@@ -14,6 +14,7 @@
   let maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
   let map: Map | undefined;
   let loaded = false;
+  let useMercator = true;
 
   let inputWkt = twoLines;
   let line1: Feature<LineString> | undefined;
@@ -84,9 +85,14 @@
 
     <textarea bind:value={inputWkt} />
 
+    <label>
+            <input type="checkbox" bind:checked={useMercator} />
+            Convert to Euclidean using Mercator projection
+    </label>
+
     {#if loaded && line1 && line2}
       <pre>{JSON.stringify(
-          JSON.parse(compareLines(line1, line2)),
+          JSON.parse(compareLines(line1, line2, useMercator)),
           null,
           "  ",
         )}</pre>
