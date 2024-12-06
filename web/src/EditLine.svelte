@@ -3,9 +3,6 @@
   import { Marker } from "svelte-maplibre";
 
   export let f: Feature<LineString>;
-
-  let pt1 = f.geometry.coordinates[0];
-  console.log(pt1);
 </script>
 
 {#each f.geometry.coordinates as pt}
