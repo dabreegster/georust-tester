@@ -4,46 +4,60 @@
   import { Layout } from "svelte-utils/two_column_layout";
   import type { Map } from "maplibre-gl";
   import { LineLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import type { FeatureCollection } from "geojson";
+  import type { FeatureCollection, Feature, LineString } from "geojson";
   import bbox from "@turf/bbox";
   import { parse as parseWkt } from "wkt";
   import { twoLines } from "./examples";
+  import EditLine from "./EditLine.svelte";
 
   let maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
   let map: Map | undefined;
 
   let inputWkt = twoLines;
+  let line1: Feature<LineString> | undefined;
+  let line2: Feature<LineString> | undefined;
 
-  $: inputGj = parseLines(inputWkt);
-  $: zoomTo(map, inputGj);
+  $: parseLines(inputWkt);
+  $: gj = makeGj(line1, line2);
+  // TODO Don't trigger when editing a line by markers
+  $: zoomTo(map, gj);
 
-  function parseLines(wkt: string): FeatureCollection {
+  function makeGj(
+    line1: Feature<LineString> | undefined,
+    line2: Feature<LineString> | undefined,
+  ) {
+    return {
+      type: "FeatureCollection" as const,
+      features: line1 && line2 ? [line1, line2] : [],
+    };
+  }
+
+  function parseLines(inputWkt: string) {
+    line1 = undefined;
+    line2 = undefined;
+
     try {
-      let gj = parseWkt(wkt);
-      gj.type = "FeatureCollection";
-      gj.features = gj.geometries.map((geometry) => {
+      let wkt = parseWkt(inputWkt);
+      let features = wkt.geometries.map((geometry) => {
         return {
           type: "Feature",
           geometry,
           properties: {},
         };
       });
-      delete gj.geometries;
 
       if (
-        gj.features.length != 2 ||
-        gj.features[0].geometry.type != "LineString" ||
-        gj.features[1].geometry.type != "LineString"
+        features.length != 2 ||
+        features[0].geometry.type != "LineString" ||
+        features[1].geometry.type != "LineString"
       ) {
         throw new Error(`Need exactly 2 LineStrings`);
       }
-      return gj;
+
+      line1 = features[0];
+      line2 = features[1];
     } catch (err) {
       window.alert(err);
-      return {
-        type: "FeatureCollection",
-        features: [],
-      };
     }
   }
 
@@ -71,7 +85,7 @@
       hash
       bind:map
     >
-      <GeoJSON data={inputGj} generateId>
+      <GeoJSON data={gj} generateId>
         <LineLayer
           paint={{
             "line-width": 5,
@@ -79,6 +93,13 @@
           }}
         />
       </GeoJSON>
+
+      {#if line1}
+        <EditLine bind:f={line1} />
+      {/if}
+      {#if line2}
+        <EditLine bind:f={line2} />
+      {/if}
     </MapLibre>
   </div>
 </Layout>
