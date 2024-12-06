@@ -10,11 +10,14 @@
   import { onMount } from "svelte";
   import { MapLibre } from "svelte-maplibre";
   import CompareLineStrings from "./CompareLineStrings.svelte";
+  import LineInterpolatePoint from "./LineInterpolatePoint.svelte";
 
   let maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
   let map: Map | undefined;
   let loaded = false;
-  let mode = "compare-linestrings";
+  let mode = "CompareLineStrings";
+
+  let modes = ["CompareLineStrings", "LineInterpolatePoint"];
 
   onMount(async () => {
     await init();
@@ -40,7 +43,9 @@
     <label>
       Mode:
       <select bind:value={mode}>
-        <option value="compare-linestrings">Compare LineStrings</option>
+        {#each modes as mode}
+          <option value={mode}>{mode}</option>
+        {/each}
       </select>
     </label>
 
@@ -56,8 +61,10 @@
       <div bind:this={mapDiv} />
 
       {#if loaded && map}
-        {#if mode == "compare-linestrings"}
+        {#if mode == "CompareLineStrings"}
           <CompareLineStrings {map} />
+        {:else if mode == "LineInterpolatePoint"}
+          <LineInterpolatePoint {map} />
         {/if}
       {/if}
     </MapLibre>
