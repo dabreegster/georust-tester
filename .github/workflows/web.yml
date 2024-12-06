@@ -32,6 +32,8 @@ jobs:
           npm ci
           npm run wasm-release
           npm run build --if-present
+          # TODO Not sure why this is happening
+          mv dist/assets/backend_bg.wasm dist/
 
       - name: Publish
         uses: peaceiris/actions-gh-pages@v4
