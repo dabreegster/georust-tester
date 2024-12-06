@@ -1,7 +1,7 @@
 use std::sync::Once;
 
 use anyhow::Result;
-use geo::{Haversine, Length, LineString};
+use geo::{Distance, Euclidean, FrechetDistance, HausdorffDistance, LineString};
 use geojson::Feature;
 
 use wasm_bindgen::prelude::*;
@@ -24,8 +24,9 @@ pub fn compare_lines(input1: JsValue, input2: JsValue) -> Result<String, JsValue
     let line2: LineString = f2.try_into().map_err(err_to_js)?;
 
     Ok(serde_json::json!({
-        "length1": line1.length::<Haversine>(),
-        "length2": line2.length::<Haversine>(),
+        "euclidean": Euclidean::distance(&line1, &line2),
+        "frechet": line1.frechet_distance(&line2),
+        "hausdorff": line1.hausdorff_distance(&line2),
     })
     .to_string())
 }

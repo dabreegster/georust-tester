@@ -85,7 +85,11 @@
     <textarea bind:value={inputWkt} />
 
     {#if loaded && line1 && line2}
-      <p>{compareLines(line1, line2)}</p>
+      <pre>{JSON.stringify(
+          JSON.parse(compareLines(line1, line2)),
+          null,
+          "  ",
+        )}</pre>
     {/if}
   </div>
 
@@ -93,7 +97,6 @@
     <MapLibre
       style={`https://api.maptiler.com/maps/dataviz/style.json?key=${maptilerApiKey}`}
       standardControls
-      hash
       bind:map
     >
       <GeoJSON data={gj} generateId>
